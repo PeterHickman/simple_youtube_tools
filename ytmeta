@@ -1,0 +1,110 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'open-uri'
+require 'csv'
+
+require 'colorize'
+
+WANTED = %w[
+  videoId
+  channelId
+  duration
+  name
+  datePublished
+  uploadDate
+]
+
+DOWNLOADED = 'downloaded.txt'
+METADATA = 'metadata.csv'
+
+def conv(s)
+  s =~ /^PT(\d+)M(\d+)S/
+  m = $1.to_i
+  s = $2.to_i
+  h = 0
+  if m >= 60
+    nm = m % 60
+    h = (m - nm) / 60
+    m = nm
+  end
+
+  format('%02<h>d:%02<m>d:%02<s>d', h: h, m: m, s: s)
+end
+
+def clean(s)
+  s.gsub('&quot;', "'").gsub('&amp;', '&').gsub('&#39;', "'")
+end
+
+if File.exist?(METADATA)
+  found_data = CSV.read(METADATA)
+  found_data.shift
+else
+  found_data = []
+end
+
+existing_keys = found_data.map { |row| row.first }
+
+downloaded = File.open(DOWNLOADED, 'r').map { |line| line.chomp }
+
+puts "==> Collect metadata for downloaded videos".bold
+puts "    #{downloaded.size} downloads".bold
+
+todo = []
+downloaded.each do |vid|
+  next if existing_keys.include?(vid)
+  todo << vid
+end
+
+puts "    #{todo.size} to check".bold
+
+todo.each_with_index do |vid, index|
+  puts "==> Collecting data for #{vid} (#{index + 1} of #{todo.size})".green
+
+  data = {}
+  prop = nil
+  content = nil
+
+  begin
+    html = open("http://youtube.com/watch?v=#{vid}").read
+
+    ##
+    # Sometimes all the HTML is on one line
+    # so we need to split it up
+    ##
+    html.split('<').each do |line|
+      line =~ /meta itemprop="([^"]+)"/
+      prop = $1
+
+      next unless WANTED.include?(prop)
+
+      line =~ /content="([^"]+)"/
+
+      case prop
+      when 'duration'
+        data[prop] = conv($1)
+      when 'name'
+        data[prop] = clean($1)
+      else
+        data[prop] = $1
+      end
+    end
+  rescue => e
+    puts "   #{e}".red
+  end
+
+  if data.any?
+    puts "    #{data['name']}"
+    found_data << WANTED.map { |prop| data[prop] }
+  else
+    puts "    No data found for #{vid}".red
+  end
+end
+
+puts "==> Writing data to #{METADATA}".bold
+
+f = File.open(METADATA, 'w')
+
+f.puts WANTED.to_csv
+found_data.sort { |a, b| a[3] <=> b[3] }.each { |row| f.puts row.to_csv }
+f.close

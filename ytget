@@ -1,0 +1,107 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+YT_DOWNLOADER = 'yt-dlp' # 'youtube-dl'
+
+require 'colorize'
+
+class List
+  attr :data
+
+  def initialize(filename)
+    @filename = filename
+
+    @data = []
+
+    load
+  end
+
+  def size
+    @data.size
+  end
+
+  def name
+    @filename
+  end
+
+  def save
+    f = File.open(@filename, 'w')
+    f.puts @data.uniq.join("\n")
+    f.close
+  end
+
+  def include?(value)
+    @data.include?(value)
+  end
+
+  def <<(value)
+    @data << value
+  end
+
+  private
+
+  def load
+    if File.exist?(@filename)
+      @data = File.open(@filename, 'r').map { |line| line.split(/\s+/).first }
+    else
+      puts "File [#{@filename}] not available"
+    end
+  end
+end
+
+def get_files
+  downloaded = 'downloaded.txt'
+  available  = nil
+
+  Dir['*.txt'].each do |filename|
+    filename.chomp!
+
+    next if filename == 'downloaded.txt'
+
+    if available.nil?
+      available = filename
+    else
+      puts "Available already set to [#{available}] found [#{filename}]".red
+      exit 1
+    end
+  end
+
+  if available.nil?
+    puts 'No files of videos found'.red
+    exit 1
+  end
+
+  [downloaded, available]
+end
+
+d, a = get_files
+
+downloads = List.new(d)
+available = List.new(a)
+
+puts "==> Existing downloads in [#{downloads.name}] (#{downloads.size} lines)".bold
+puts "    Available videos in [#{available.name}] (#{available.size} lines)".bold
+
+todo = []
+available.data.each do |vid|
+  next if downloads.include?(vid)
+  todo << vid
+end
+
+puts "    #{todo.size} new videos to download".bold
+
+todo.each_with_index do |vid, index|
+  puts "==> Downloading #{vid} (#{index + 1} of #{todo.size})".green
+  r = system("#{YT_DOWNLOADER} -f best https://www.youtube.com/watch?v=#{vid}")
+  if r == true
+    puts '    Done'.green
+    downloads << vid
+    downloads.save
+  else
+    puts '    Something went wrong!'.red
+  end
+
+  sleep 5
+end
+
+puts '==> Ended'.bold

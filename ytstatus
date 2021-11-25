@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'colorize'
+
+K = 1024
+M = 1024 * 1024
+G = 1024 * 1024 * 1024
+
+def hsize(bytes)
+  if bytes >= G
+    '%.2fGb' % (bytes.to_f / G)
+  elsif bytes >= M
+    '%.2fMb' % (bytes.to_f / M)
+  elsif bytes >= K
+    '%.2fKb' % (bytes.to_f / K)
+  else
+    "#{bytes}b"
+  end
+end
+
+def as_list(path, filename)
+  return [] unless File.exist?("#{path}/#{filename}")
+
+  File.open("#{path}/#{filename}", 'r').read.split("\n").map { |x| x.split(/\s+/).first }
+end
+
+def outstanding(path, txts)
+  return 0 if txts.size > 2
+
+  txts.delete('downloaded.txt')
+
+  done = as_list(path, 'downloaded.txt')
+
+  todo = 0
+  as_list(path, txts.first).each do |vid|
+    next if done.include?(vid)
+    todo += 1
+  end
+
+  return todo
+end
+
+def review(path)
+  mp4_count = 0
+  mp4_size  = 0
+
+  part_count = 0
+  part_size  = 0
+
+  txts = []
+
+  Dir["#{path}/*"].each do |filename|
+    if filename.end_with?('.mp4')
+      mp4_count += 1
+      # mp4_size  += File.size(filename)
+    elsif filename.end_with?('.part')
+      part_count += 1
+      # part_size  += File.size(filename)
+    elsif filename.end_with?('.txt')
+      txts << File.basename(filename)
+    end
+  end
+
+  to_download = outstanding(path, txts)
+
+  to_download -= part_count
+  to_download = 0 if to_download < 0
+
+  [to_download, mp4_count, mp4_size, part_count, part_size]
+end
+
+puts '%-30s │ %10s │ %10s │ %10s' % ['Name', 'Pending', 'Downloaded', 'Partial']
+puts '───────────────────────────────┼────────────┼────────────┼──────────-'
+
+Dir['*'].sort.each do |dir|
+  next unless File.directory?(dir)
+
+  to_download, mp4_count, mp4_size, part_count, part_size = review(dir)
+
+  p0 = '%-30s' % dir
+  p0 = p0.bold
+
+  p1 = '%10s' % (to_download == 0 ? '-' : to_download.to_s)
+  p1 = p1.yellow if to_download > 0
+
+  p2 = '%10s' % (mp4_count == 0 ? '-' : mp4_count.to_s)
+  p2 = p2.green if mp4_count > 0
+
+  p3 = '%10s' % (part_count == 0 ? '-' : part_count.to_s)
+  p3 = p3.red if part_count > 0
+
+  puts '%-30s │ %s │ %s │ %s' % [p0, p1, p2, p3]
+end
