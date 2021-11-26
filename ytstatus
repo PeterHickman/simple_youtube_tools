@@ -71,7 +71,7 @@ def review(path)
 end
 
 puts '%-30s │ %10s │ %10s │ %10s' % ['Name', 'Pending', 'Downloaded', 'Partial']
-puts '───────────────────────────────┼────────────┼────────────┼──────────-'
+puts '───────────────────────────────┼────────────┼────────────┼───────────'
 
 Dir['*'].sort.each do |dir|
   next unless File.directory?(dir)
