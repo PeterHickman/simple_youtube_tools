@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'colorize'
-
 K = 1024
 M = 1024 * 1024
 G = 1024 * 1024 * 1024
 
-def hsize(bytes)
+def hsize(bytes, zero = false)
+  return '-' if bytes == 0 && zero == false
+
   if bytes >= G
     '%.2fGb' % (bytes.to_f / G)
   elsif bytes >= M
@@ -53,10 +53,10 @@ def review(path)
   Dir["#{path}/*"].each do |filename|
     if filename.end_with?('.mp4')
       mp4_count += 1
-      # mp4_size  += File.size(filename)
+      mp4_size  += File.size(filename)
     elsif filename.end_with?('.part')
       part_count += 1
-      # part_size  += File.size(filename)
+      part_size  += File.size(filename)
     elsif filename.end_with?('.txt')
       txts << File.basename(filename)
     end
@@ -64,31 +64,20 @@ def review(path)
 
   to_download = outstanding(path, txts)
 
-  to_download -= part_count
-  to_download = 0 if to_download < 0
-
-  [to_download, mp4_count, mp4_size, part_count, part_size]
+  [to_download, mp4_count, hsize(mp4_size), part_count, hsize(part_size)]
 end
 
-puts '%-30s │ %10s │ %10s │ %10s' % ['Name', 'Pending', 'Downloaded', 'Partial']
-puts '───────────────────────────────┼────────────┼────────────┼───────────'
+puts '%-30s │ %10s │ %23s │ %23s │' % ['Name', 'Pending', 'Downloaded', 'Partial']
+puts '───────────────────────────────┼────────────┼────────────┬────────────┼────────────┬────────────┤'
 
 Dir['*'].sort.each do |dir|
   next unless File.directory?(dir)
 
   to_download, mp4_count, mp4_size, part_count, part_size = review(dir)
 
-  p0 = '%-30s' % dir
-  p0 = p0.bold
+  to_download = to_download.zero? ? '-' : to_download
+  mp4_count = mp4_count.zero? ? '-' : mp4_count
+  part_count = part_count.zero? ? '-' : part_count
 
-  p1 = '%10s' % (to_download == 0 ? '-' : to_download.to_s)
-  p1 = p1.yellow if to_download > 0
-
-  p2 = '%10s' % (mp4_count == 0 ? '-' : mp4_count.to_s)
-  p2 = p2.green if mp4_count > 0
-
-  p3 = '%10s' % (part_count == 0 ? '-' : part_count.to_s)
-  p3 = p3.red if part_count > 0
-
-  puts '%-30s │ %s │ %s │ %s' % [p0, p1, p2, p3]
+  puts '%-30s │ %10s │ %10s │ %10s │ %10s │ %10s │' % [dir, to_download, mp4_count, mp4_size, part_count, part_size]
 end

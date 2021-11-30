@@ -58,53 +58,57 @@ end
 
 puts "    #{todo.size} to check".bold
 
-todo.each_with_index do |vid, index|
-  puts "==> Collecting data for #{vid} (#{index + 1} of #{todo.size})".green
+begin
+  todo.each_with_index do |vid, index|
+    puts "==> Collecting data for #{vid} (#{index + 1} of #{todo.size})".green
 
-  data = {}
-  prop = nil
-  content = nil
+    data = {}
+    prop = nil
+    content = nil
 
-  begin
-    html = open("http://youtube.com/watch?v=#{vid}").read
+    begin
+      html = open("http://youtube.com/watch?v=#{vid}").read
 
-    ##
-    # Sometimes all the HTML is on one line
-    # so we need to split it up
-    ##
-    html.split('<').each do |line|
-      line =~ /meta itemprop="([^"]+)"/
-      prop = $1
+      ##
+      # Sometimes all the HTML is on one line
+      # so we need to split it up
+      ##
+      html.split('<').each do |line|
+        line =~ /meta itemprop="([^"]+)"/
+        prop = $1
 
-      next unless WANTED.include?(prop)
+        next unless WANTED.include?(prop)
 
-      line =~ /content="([^"]+)"/
+        line =~ /content="([^"]+)"/
 
-      case prop
-      when 'duration'
-        data[prop] = conv($1)
-      when 'name'
-        data[prop] = clean($1)
-      else
-        data[prop] = $1
+        case prop
+        when 'duration'
+          data[prop] = conv($1)
+        when 'name'
+          data[prop] = clean($1)
+        else
+          data[prop] = $1
+        end
       end
+    rescue => e
+      puts "   #{e}".red
     end
-  rescue => e
-    puts "   #{e}".red
-  end
 
-  if data.any?
-    puts "    #{data['name']}"
-    found_data << WANTED.map { |prop| data[prop] }
-  else
-    puts "    No data found for #{vid}".red
+    if data.any?
+      puts "    #{data['name']}"
+      found_data << WANTED.map { |prop| data[prop] }
+    else
+      puts "    No data found for #{vid}".red
+    end
   end
+rescue
+  puts 'Something bad happened'.red
+ensure
+  puts "==> Writing data to #{METADATA}".bold
+
+  f = File.open(METADATA, 'w')
+
+  f.puts WANTED.to_csv
+  found_data.sort { |a, b| a[3] <=> b[3] }.each { |row| f.puts row.to_csv }
+  f.close
 end
-
-puts "==> Writing data to #{METADATA}".bold
-
-f = File.open(METADATA, 'w')
-
-f.puts WANTED.to_csv
-found_data.sort { |a, b| a[3] <=> b[3] }.each { |row| f.puts row.to_csv }
-f.close
