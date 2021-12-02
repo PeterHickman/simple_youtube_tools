@@ -6,7 +6,9 @@ require 'fileutils'
 
 require 'colorize'
 
-MPV = '/Applications/mpv.app/Contents/MacOS/mpv --really-quiet --fullscreen'
+MPV = '/Applications/mpv.app/Contents/MacOS/mpv --really-quiet'
+
+MPV_OPTIONS = ARGV.join(' ')
 
 def find(vid, videos)
   x = videos.select { |x| x.include?(vid) }
@@ -50,7 +52,7 @@ end
 
 puts "==> Found #{filename} #{date_published}".green
 
-r = system("#{MPV} '#{filename}'")
+r = system("#{MPV} #{MPV_OPTIONS} '#{filename}'")
 
 if r
   puts "    Moving [#{filename}] to videos".green
