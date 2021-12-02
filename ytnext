@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'csv'
+require 'fileutils'
+
+require 'colorize'
+
+MPV = '/Applications/mpv.app/Contents/MacOS/mpv --really-quiet'
+
+def find(vid, videos)
+  x = videos.select { |x| x.include?(vid) }
+
+  if x.size == 1
+    x.first
+  else
+    nil
+  end
+end
+
+unless File.exist?('metadata.csv')
+  puts '==> There is no metadata.csv file'
+  exit 1
+end
+
+##
+# This will be a list of all the downloaded videos that
+# have not yet been placed in the videos directory
+##
+vidoes = Dir['*.mp4'].map { |v| v }
+
+date_published = Time.new.strftime('%Y-%m-%d')
+filename = nil
+
+CSV.read('metadata.csv', headers: true).each do |row|
+  if row['datePublished'] < date_published
+    f = find(row['videoId'], vidoes)
+
+    next if f.nil?
+
+    filename = f
+    date_published = row['datePublished']
+  end
+end
+
+if filename.nil?
+  puts '    Nothing found'.red
+  exit 1
+end
+
+puts "==> Found [#{filename}] #{date_published}".green
+
+r = system("#{MPV} '#{filename}'")
+
+if r
+  puts "    Moving [#{filename}] to videos".green
+  FileUtils.move(filename, 'videos/')
+else
+  puts "    Somthing happened, leaving #{filename} in place".bold
+end
