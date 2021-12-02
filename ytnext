@@ -3,6 +3,7 @@
 
 require 'csv'
 require 'fileutils'
+require 'shellwords'
 
 require 'colorize'
 
@@ -52,7 +53,7 @@ end
 
 puts "==> Found #{filename} #{date_published}".green
 
-r = system("#{MPV} #{MPV_OPTIONS} '#{filename}'")
+r = system("#{MPV} #{MPV_OPTIONS} #{Shellwords.escape(filename)}")
 
 if r
   puts "    Moving [#{filename}] to videos".green
