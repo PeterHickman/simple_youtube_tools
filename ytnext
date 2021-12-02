@@ -48,7 +48,7 @@ if filename.nil?
   exit 1
 end
 
-puts "==> Found [#{filename}] #{date_published}".green
+puts "==> Found #{filename} #{date_published}".green
 
 r = system("#{MPV} '#{filename}'")
 
