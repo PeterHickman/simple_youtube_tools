@@ -6,7 +6,7 @@ require 'fileutils'
 
 require 'colorize'
 
-MPV = '/Applications/mpv.app/Contents/MacOS/mpv --really-quiet'
+MPV = '/Applications/mpv.app/Contents/MacOS/mpv --really-quiet --fullscreen'
 
 def find(vid, videos)
   x = videos.select { |x| x.include?(vid) }
