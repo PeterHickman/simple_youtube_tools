@@ -34,6 +34,7 @@ vidoes = Dir['*.mp4'].map { |v| v }
 
 date_published = Time.new.strftime('%Y-%m-%d')
 filename = nil
+duration = nil
 
 CSV.read('metadata.csv', headers: true).each do |row|
   if row['datePublished'] < date_published
@@ -42,6 +43,7 @@ CSV.read('metadata.csv', headers: true).each do |row|
     next if f.nil?
 
     filename = f
+    duration = row['duration']
     date_published = row['datePublished']
   end
 end
@@ -51,7 +53,7 @@ if filename.nil?
   exit 1
 end
 
-puts "==> Found #{filename} #{date_published}".green
+puts "==> Found #{filename} #{date_published} #{duration}".green
 
 r = system("#{MPV} #{MPV_OPTIONS} #{Shellwords.escape(filename)}")
 
