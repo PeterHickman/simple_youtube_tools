@@ -53,12 +53,12 @@ if filename.nil?
   exit 1
 end
 
-puts "==> Found #{filename} #{date_published} #{duration}".green
+puts "==> #{filename} #{date_published} #{duration}".green
 
 r = system("#{MPV} #{MPV_OPTIONS} #{Shellwords.escape(filename)}")
 
 if r
-  puts "    Moving [#{filename}] to videos".green
+  puts "    #{filename} moved to videos".green
   FileUtils.move(filename, 'videos/')
 else
   puts "    Somthing happened, leaving #{filename} in place".bold

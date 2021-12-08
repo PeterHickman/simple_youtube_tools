@@ -7,6 +7,6 @@ if [ -z "${URL}" ]; then
   exit 1
 fi
 
-youtube-dl --get-filename --ignore-errors --output "%(id)s %(title)s" $1
+youtube-dl --get-filename --ignore-errors --output "%(id)s %(title)s" ${URL}
 
 exit 0
