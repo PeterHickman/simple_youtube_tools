@@ -32,34 +32,31 @@ end
 ##
 vidoes = Dir['*.mp4'].map { |v| v }
 
-date_published = Time.new.strftime('%Y-%m-%d')
-filename = nil
-duration = nil
+x = []
 
 CSV.read('metadata.csv', headers: true).each do |row|
-  if row['datePublished'] < date_published
-    f = find(row['videoId'], vidoes)
+  f = find(row['videoId'], vidoes)
+  next if f.nil?
 
-    next if f.nil?
-
-    filename = f
-    duration = row['duration']
-    date_published = row['datePublished']
-  end
+  x << { filename: f, duration: row['duration'], datePublished: row['datePublished'] }
 end
 
-if filename.nil?
+unless x.any?
   puts '    Nothing found'.red
   exit 1
 end
 
-puts "==> #{filename} #{date_published} #{duration}".green
+x.sort! { |a, b| a[:datePublished] <=> b[:datePublished] }
 
-r = system("#{MPV} #{MPV_OPTIONS} #{Shellwords.escape(filename)}")
+x.each do |y|
+  puts "==> #{y[:filename]} #{y[:datePublished]} #{y[:duration]}".green
 
-if r
-  puts "    #{filename} moved to videos".green
-  FileUtils.move(filename, 'videos/')
-else
-  puts "    Somthing happened, leaving #{filename} in place".bold
+  r = system("#{MPV} #{MPV_OPTIONS} #{Shellwords.escape(y[:filename])}")
+
+  if r
+    puts "    #{y[:filename]} moved to videos".green
+    FileUtils.move(y[:filename], 'videos/')
+  else
+    puts "    Somthing happened, leaving #{y[:filename]} in place".bold
+  end
 end
