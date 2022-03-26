@@ -8,7 +8,7 @@
 # WARNING: "-f best" selects the best pre-merged format which is often not the best option.
 #          To let yt-dlp download and merge the best available formats, simply do not pass any format selection.
 #          If you know what you are doing and want only the best pre-merged format, use "-f b" instead to suppress this warning
-YT_DOWNLOADER = 'yt-dlp -f b'
+# YT_DOWNLOADER = 'yt-dlp -f b'
 
 ## Fallback. When the video does not download use this and some format (probably a multi Gb .webm file) will download
 # but it will probably be at some crazy 4k or 8k resolution and need to be resized
@@ -85,6 +85,8 @@ def get_files
   [downloaded, available]
 end
 
+downloader = ARGV.include?('webm') ? 'yt-dlp' : 'yt-dlp -f b'
+
 d, a = get_files
 
 downloads = List.new(d)
@@ -103,7 +105,7 @@ puts "    #{todo.size} new videos to download".bold
 
 todo.each_with_index do |vid, index|
   puts "==> Downloading #{vid} (#{index + 1} of #{todo.size})".green
-  r = system("#{YT_DOWNLOADER} https://www.youtube.com/watch?v=#{vid}")
+  r = system("#{downloader} https://www.youtube.com/watch?v=#{vid}")
   if r == true
     puts '    Done'.green
     downloads << vid
