@@ -43,6 +43,7 @@ end
 # have not yet been placed in the videos directory
 ##
 vidoes = Dir['*.mp4'].map { |v| v }
+max = all_videos ? counter : vidoes.size
 
 x = []
 
@@ -63,7 +64,7 @@ x.sort! { |a, b| a[:datePublished] <=> b[:datePublished] }
 i = 0
 x.each do |y|
   i += 1
-  puts "[#{i}] #{y[:filename]} #{y[:datePublished]} #{y[:duration]}".green
+  puts "[#{i}/#{max}] #{y[:filename]} #{y[:datePublished]} #{y[:duration]}".green
 
   r = system("#{MPV} #{mpv_options} #{Shellwords.escape(y[:filename])}")
 
