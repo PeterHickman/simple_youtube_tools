@@ -43,7 +43,7 @@ end
 # have not yet been placed in the videos directory
 ##
 vidoes = Dir['*.mp4'].map { |v| v }
-max = all_videos ? counter : vidoes.size
+max = all_videos ? vidoes.size : counter
 
 x = []
 
