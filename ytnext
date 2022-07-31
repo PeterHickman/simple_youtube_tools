@@ -12,11 +12,14 @@ MPV = '/Applications/mpv.app/Contents/MacOS/mpv --really-quiet'
 mpv_options = ''
 all_videos = true
 counter = 0
+listing = false
 
 ARGV.each do |opt|
   case opt.downcase
   when 'f', 'fs', 'full'
     mpv_options = '--fs'
+  when 'l', 'list'
+    listing = true
   when /^\d+$/
     all_videos = false
     counter = opt.to_i
@@ -60,6 +63,15 @@ unless x.any?
 end
 
 x.sort! { |a, b| a[:datePublished] <=> b[:datePublished] }
+
+if listing
+  i = 0
+  x.each do |y|
+    i += 1
+    puts "[#{i}/#{max}] #{y[:filename]} #{y[:datePublished]} #{y[:duration]}".green
+  end
+  exit 0
+end
 
 i = 0
 x.each do |y|
