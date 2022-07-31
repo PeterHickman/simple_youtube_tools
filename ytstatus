@@ -5,6 +5,8 @@ K = 1024
 M = 1024 * 1024
 G = 1024 * 1024 * 1024
 
+full = ARGV.inlcude?(full)
+
 def hsize(bytes, zero = false)
   return '-' if bytes == 0 && zero == false
 
@@ -74,6 +76,8 @@ Dir['*'].sort.each do |dir|
   next unless File.directory?(dir)
 
   to_download, mp4_count, mp4_size, part_count, part_size = review(dir)
+
+  next if full == false && to_download == 0 && mp4_count == 0 && part_count == 0
 
   to_download = to_download.zero? ? '-' : to_download
   mp4_count = mp4_count.zero? ? '-' : mp4_count
