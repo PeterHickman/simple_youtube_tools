@@ -1,19 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-## Default setting
-# YT_DOWNLOADER = 'youtube-dl -f best'
-
-## Using yt-dlp
-# WARNING: "-f best" selects the best pre-merged format which is often not the best option.
-#          To let yt-dlp download and merge the best available formats, simply do not pass any format selection.
-#          If you know what you are doing and want only the best pre-merged format, use "-f b" instead to suppress this warning
-# YT_DOWNLOADER = 'yt-dlp -f b'
-
-## Fallback. When the video does not download use this and some format (probably a multi Gb .webm file) will download
-# but it will probably be at some crazy 4k or 8k resolution and need to be resized
-# YT_DOWNLOADER = 'yt-dlp'
-
 require 'colorize'
 
 class List
@@ -85,7 +72,7 @@ def get_files
   [downloaded, available]
 end
 
-downloader = ARGV.include?('webm') ? 'yt-dlp' : 'yt-dlp -f b'
+downloader = 'yt-dlp'
 
 d, a = get_files
 
