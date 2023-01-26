@@ -72,7 +72,8 @@ def get_files
   [downloaded, available]
 end
 
-downloader = 'yt-dlp'
+#downloader = 'yt-dlp --recode mp4'
+downloader = 'yt-dlp -f b'
 
 d, a = get_files
 
@@ -88,9 +89,14 @@ available.data.each do |vid|
   todo << vid
 end
 
+limit = 9999
+limit = ARGV[0].to_i if ARGV[0]
+
 puts "    #{todo.size} new videos to download".bold
 
 todo.each_with_index do |vid, index|
+  break if index == limit
+
   puts "==> Downloading #{vid} (#{index + 1} of #{todo.size})".green
   r = system("#{downloader} https://www.youtube.com/watch?v=#{vid}")
   if r == true
