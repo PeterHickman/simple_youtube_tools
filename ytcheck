@@ -1,0 +1,56 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'shellwords'
+
+require 'colorize'
+
+def get_vid(file)
+  file.split('[').last.split(']').first
+end
+
+def load_downloaded
+  if File.exist?('downloaded.txt')
+    File.open('downloaded.txt', 'r').read.split("\n")
+  else
+    puts "There needs to be a downloaded.txt here".red
+    exit 1
+  end
+end
+
+def save_downloaded(downloaded)
+  f = File.open('downloaded.txt', 'w')
+  downloaded.each do |line|
+    f.puts line
+  end
+  f.close
+end
+
+puts "==> Checking the integrity of the videos".bold
+
+downloaded = load_downloaded
+broken = false
+
+Dir['**/*.mp4'].each do |file|
+  vid = get_vid(file)
+
+  puts "==> #{vid}"
+
+  r = system("ffmpeg -v error -i #{Shellwords.escape(file)} -f null - 2>error.log")
+  if r
+    puts "    #{file}".green
+  else
+    puts "    #{file}".red
+
+    begin
+      File.delete(file)
+    rescue => e
+      puts "    #{e}"
+    end
+
+    downloaded.delete(vid)
+    broken = true
+  end
+end
+
+save_downloaded(downloaded) if broken
