@@ -55,8 +55,6 @@ def get_crc(file)
   x.split(/\s+/).first
 end
 
-puts "==> Checking the integrity of the videos".bold
-
 downloaded = load_downloaded
 crc = load_crc
 
@@ -67,10 +65,7 @@ Dir['**/*.mp4'].each do |file|
 
   vid = get_vid(file)
 
-  if crc.key?(vid)
-    puts "    #{name}".blue
-    next
-  end
+  next if crc.key?(vid)
 
   r = system("ffmpeg -v error -i #{Shellwords.escape(file)} -f null - 2>error.log")
   if r
