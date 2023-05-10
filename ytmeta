@@ -36,6 +36,14 @@ def clean(s)
   s.gsub('&quot;', "'").gsub('&amp;', '&').gsub('&#39;', "'")
 end
 
+def all_props?(l)
+  l.each do |x|
+    return false if x.nil?
+  end
+
+  true
+end
+
 if File.exist?(METADATA)
   found_data = CSV.read(METADATA)
   found_data.shift
@@ -96,7 +104,12 @@ begin
 
     if data.any?
       puts "    #{data['name']}"
-      found_data << WANTED.map { |prop| data[prop] }
+      x = WANTED.map { |prop| data[prop] }
+      if all_props?(x)
+        found_data << x
+      else
+        puts "    Incomplete data for #{vid}".red
+      end
     else
       puts "    No data found for #{vid}".red
     end
