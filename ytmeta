@@ -7,8 +7,7 @@ require 'csv'
 require 'colorize'
 
 WANTED = %w[
-  videoId
-  channelId
+  identifier
   duration
   name
   datePublished
