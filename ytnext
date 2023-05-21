@@ -51,7 +51,7 @@ max = all_videos ? vidoes.size : counter
 x = []
 
 CSV.read('metadata.csv', headers: true).each do |row|
-  f = find(row['videoId'], vidoes)
+  f = find(row['identifier'], vidoes)
   next if f.nil?
 
   x << { filename: f, duration: row['duration'], datePublished: row['datePublished'] }
