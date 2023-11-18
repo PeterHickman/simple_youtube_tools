@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require 'colorize'
+
+storage = ARGV.shift
+
+unless File.directory?(storage)
+  puts "Directory [#{storage}] does not exist or is not a directory".red
+  exit 1
+end
+
+File.open('metadata.csv', 'r').each do |line|
+  vid = line.split(',').first
+  next if vid == 'identifier'
+
+  puts "==> #{vid}".bold
+  url = "https://i.ytimg.com/vi/#{vid}/hqdefault_live.jpg"
+  filename = "#{storage}/#{vid}.jpg"
+
+  next if File.exist?(filename)
+
+  puts "    getting...".green
+
+  `wget --quiet -O #{filename} #{url}`
+end
