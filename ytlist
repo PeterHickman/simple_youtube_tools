@@ -7,6 +7,8 @@ if [ -z "${URL}" ]; then
   exit 1
 fi
 
-yt-dlp --get-filename --ignore-errors --output "%(id)s %(title)s" ${URL}
+# yt-dlp --get-filename --ignore-errors --output "%(id)s %(title)s" ${URL}
+
+yt-dlp --skip-download --flat-playlist --ignore-errors --no-warnings --print-to-file "%(id)s # %(title)s" "%(uploader)s.txt" ${URL}
 
 exit 0
