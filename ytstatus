@@ -5,7 +5,10 @@ K = 1024
 M = 1024 * 1024
 G = 1024 * 1024 * 1024
 
-full = ARGV.inlcude?(full)
+args = ARGV.dup
+
+full = args.delete('-v')
+script = args.delete('-s')
 
 def hsize(bytes, zero = false)
   return '-' if bytes == 0 && zero == false
@@ -69,19 +72,43 @@ def review(path)
   [to_download, mp4_count, hsize(mp4_size), part_count, hsize(part_size)]
 end
 
-puts '%-30s │ %10s │ %23s │ %23s │' % ['Name', 'Pending', 'Downloaded', 'Partial']
-puts '───────────────────────────────┼────────────┼────────────┬────────────┼────────────┬────────────┤'
+data = []
 
 Dir['*'].sort.each do |dir|
   next unless File.directory?(dir)
 
   to_download, mp4_count, mp4_size, part_count, part_size = review(dir)
 
-  next if full == false && to_download == 0 && mp4_count == 0 && part_count == 0
+  next if full.nil? && to_download == 0 && mp4_count == 0 && part_count == 0
 
   to_download = to_download.zero? ? '-' : to_download
   mp4_count = mp4_count.zero? ? '-' : mp4_count
   part_count = part_count.zero? ? '-' : part_count
 
-  puts '%-30s │ %10s │ %10s │ %10s │ %10s │ %10s │' % [dir, to_download, mp4_count, mp4_size, part_count, part_size]
+  data << [dir, to_download, mp4_count, mp4_size, part_count, part_size]
+end
+
+if script
+  header = true
+  data.each do |line|
+    next if line[2].zero?
+
+    if header
+      puts 'process() {'
+      puts 'cd $1'
+      puts 'mv *.mp4 videos/'
+      puts 'cd ..'
+      puts '}'
+      header = false
+    end
+
+    puts "process #{line[0]}"
+  end
+else
+  puts '%-30s │ %10s │ %23s │ %23s │' % ['Name', 'Pending', 'Downloaded', 'Partial']
+  puts '───────────────────────────────┼────────────┼────────────┬────────────┼────────────┬────────────┤'
+
+  data.each do |line|
+    puts '%-30s │ %10s │ %10s │ %10s │ %10s │ %10s │' % line
+  end
 end
