@@ -91,7 +91,7 @@ end
 if script
   header = true
   data.each do |line|
-    next if line[2].zero?
+    next if line[2] == '-' || line[2].zero?
 
     if header
       puts 'process() {'
