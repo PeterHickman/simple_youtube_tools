@@ -89,12 +89,23 @@ def get_options
   [flags, opts]
 end
 
+def best_format(vid, res = '1280x720')
+  x = `yt-dlp -F #{vid}`
+
+  x.split("\n").each do |line|
+    next unless line.include?(' mp4 ')
+    next unless line.include?(' https ')
+    next unless line.include?(res)
+
+    return line.split(/\s+/).first
+  end
+
+  'b'
+end
+
 flags, opts = get_options
 
-##
-# If you have problems with format 22 try with --format 135+140 or 137+140
-##
-downloader = "yt-dlp -f #{flags['format'] || 'b'}"
+fmt = flags['format'] || 'b'
 
 d, a = get_files
 
@@ -114,7 +125,15 @@ puts "    #{todo.size} new videos to download".bold
 
 todo.each_with_index do |vid, index|
   puts "==> Downloading #{vid} (#{index + 1} of #{todo.size})".green
-  r = system("#{downloader} https://www.youtube.com/watch?v=#{vid}")
+
+  if fmt == 'b'
+    f = best_format(vid)
+    f = 'b' if f.nil?
+  else
+    f = fmt
+  end
+
+  r = system("yt-dlp -f #{f} https://www.youtube.com/watch?v=#{vid}")
   if r == true
     puts '    Done'.green
     downloads << vid
