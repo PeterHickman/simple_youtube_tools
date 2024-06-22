@@ -92,15 +92,33 @@ end
 def best_format(vid, res = '1280x720')
   x = `yt-dlp -F #{vid}`
 
+  v = nil
+  a = nil
+
+  # Find the best video
   x.split("\n").each do |line|
     next unless line.include?(' mp4 ')
     next unless line.include?(' https ')
     next unless line.include?(res)
 
-    return line.split(/\s+/).first
+    v = line.split(/\s+/).first
+    break
   end
 
-  'b'
+  return 'b' if v.nil?
+
+  # Find the best audio
+  x.split("\n").each do |line|
+    next unless line.include?(' audio only ')
+    next unless line.include?(' mp4 ')
+
+    a = line.split(/\s+/).first
+    break
+  end
+
+  return 'b' if a.nil?
+
+  "#{v}+#{a}"
 end
 
 flags, opts = get_options
