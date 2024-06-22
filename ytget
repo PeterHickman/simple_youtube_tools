@@ -101,8 +101,8 @@ def best_format(vid, res = '1280x720')
     next unless line.include?(' https ')
     next unless line.include?(res)
 
+    # Earlier files are more compressed
     v = line.split(/\s+/).first
-    break
   end
 
   return 'b' if v.nil?
