@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'shellwords'
 require 'colorize'
 
 class List
@@ -90,7 +91,7 @@ def get_options
 end
 
 def best_format(vid, res = '1280x720')
-  x = `yt-dlp -F #{vid}`
+  x = `yt-dlp -F #{Shellwords.escape(vid)}`
 
   v = nil
   a = nil
