@@ -69,10 +69,24 @@ def review(path)
 
   to_download = outstanding(path, txts)
 
-  [to_download, mp4_count, hsize(mp4_size), part_count, hsize(part_size)]
+  [to_download, mp4_count, mp4_size, part_count, part_size]
+end
+
+def merge(a, b)
+  c = []
+  a.each_with_index do |e, i|
+    if b[i] == '-'
+      c << e
+    else
+      c << e + b[i]
+    end
+  end
+  c
 end
 
 data = []
+
+t = [0,0,0,0,0]
 
 Dir['*'].sort.each do |dir|
   next unless File.directory?(dir)
@@ -85,8 +99,12 @@ Dir['*'].sort.each do |dir|
   mp4_count = mp4_count.zero? ? '-' : mp4_count
   part_count = part_count.zero? ? '-' : part_count
 
-  data << [dir, to_download, mp4_count, mp4_size, part_count, part_size]
+  t = merge(t, [to_download, mp4_count, mp4_size, part_count, part_size])
+
+  data << [dir, to_download, mp4_count, hsize(mp4_size), part_count, hsize(part_size)]
 end
+
+data << ['TOTAL', t[0], t[1], hsize(t[2]), t[3], hsize(t[4])]
 
 if script
   header = true
