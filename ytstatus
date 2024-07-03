@@ -104,8 +104,6 @@ Dir['*'].sort.each do |dir|
   data << [dir, to_download, mp4_count, hsize(mp4_size), part_count, hsize(part_size)]
 end
 
-data << ['TOTAL', t[0], t[1], hsize(t[2]), t[3], hsize(t[4])]
-
 if script
   header = true
   data.each do |line|
@@ -125,6 +123,8 @@ if script
 else
   puts '%-30s │ %10s │ %23s │ %23s │' % ['Name', 'Pending', 'Downloaded', 'Partial']
   puts '───────────────────────────────┼────────────┼────────────┬────────────┼────────────┬────────────┤'
+
+  data << ['TOTAL', t[0], t[1], hsize(t[2]), t[3], hsize(t[4])]
 
   data.each do |line|
     puts '%-30s │ %10s │ %10s │ %10s │ %10s │ %10s │' % line
