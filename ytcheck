@@ -59,13 +59,14 @@ downloaded = load_downloaded
 crc = load_crc
 
 broken = false
+forced = ARGV.include?('force')
 
 Dir['**/*.mp4'].each do |file|
   name = File.basename(file)
 
   vid = get_vid(file)
 
-  next if crc.key?(vid)
+  next if forced == false && crc.key?(vid)
 
   r = system("ffmpeg -v error -i #{Shellwords.escape(file)} -f null - 2>error.log")
   if r
