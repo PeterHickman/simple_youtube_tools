@@ -92,21 +92,28 @@ def get_options
   [flags, opts]
 end
 
-def best_format(vid, res = '1280x')
+def best_format(vid)
   x = `yt-dlp -F https://www.youtube.com/watch?v=#{vid}`
 
   v = nil
   a = nil
 
+  formats = []
   # Find the best video
   x.split("\n").each do |line|
     next unless line.include?(' mp4 ')
     next unless line.include?(' https ')
-    next unless line.include?(res)
 
     # Earlier files are more compressed
     v = line.split(/\s+/).first
+    r = line.split(/\s+/)[2].split('x').first.to_i
+
+    next unless r >= 1280
+
+    formats << [r, v]
   end
+
+  v = formats.sort.first.last
 
   return 'b' if v.nil?
 
