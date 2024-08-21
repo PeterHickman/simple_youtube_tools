@@ -108,7 +108,7 @@ def best_format(vid)
     v = line.split(/\s+/).first
     r = line.split(/\s+/)[2].split('x').first.to_i
 
-    next unless r >= 1280
+    next unless r >= 1000
 
     formats << [r, v]
   end
