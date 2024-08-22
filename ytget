@@ -159,20 +159,27 @@ todo.each_with_index do |vid, index|
 
   puts "==> Downloading #{vid} (#{index + 1} of #{todo.size})".green
 
-  if fmt == 'b'
-    f = best_format(vid)
-    f = 'b' if f.nil?
-  else
-    f = fmt
-  end
+  begin
+    if fmt == 'b'
+      f = best_format(vid)
+      f = 'b' if f.nil?
+    else
+      f = fmt
+    end
 
-  r = system("yt-dlp -f #{f} https://www.youtube.com/watch?v=#{vid}")
-  if r == true
-    puts '    Done'.green
-    downloads << vid
-    downloads.save
-  else
-    puts '    Something went wrong!'.red
+    r = system("yt-dlp -f #{f} https://www.youtube.com/watch?v=#{vid}")
+    if r == true
+      puts '    Done'.green
+      downloads << vid
+      downloads.save
+    else
+      puts '    Something went wrong!'.red
+    end
+  rescue => e
+    puts "    Exception: #{e}".red
+    e.backtrace.each do |line|
+      puts "    #{line}".light_black
+    end
   end
 
   sleep 5
