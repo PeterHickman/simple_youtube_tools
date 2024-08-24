@@ -102,7 +102,7 @@ def best_format(vid)
   # Find the best video
   x.split("\n").each do |line|
     next unless line.include?(' mp4 ')
-    next unless line.include?(' https ')
+    # next unless line.include?(' https ')
 
     # Earlier files are more compressed
     v = line.split(/\s+/).first
