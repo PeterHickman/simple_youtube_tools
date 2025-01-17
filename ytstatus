@@ -56,7 +56,7 @@ def review(path)
   txts = []
 
   Dir["#{path}/*"].each do |filename|
-    if filename.end_with?('.mp4')
+    if filename.end_with?('.mp4') || filename.end_with?('.mkv')
       mp4_count += 1
       mp4_size  += File.size(filename)
     elsif filename.end_with?('.part')
@@ -112,7 +112,7 @@ if script
     if header
       puts 'process() {'
       puts 'cd $1'
-      puts 'mv *.mp4 videos/'
+      puts 'mv *.m?? videos/'
       puts 'cd ..'
       puts '}'
       header = false
