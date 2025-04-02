@@ -3,6 +3,7 @@
 
 require 'open-uri'
 require 'csv'
+require 'nokogiri'
 
 require 'colorize'
 
@@ -69,32 +70,25 @@ begin
   todo.each_with_index do |vid, index|
     puts "==> Collecting data for #{vid} (#{index + 1} of #{todo.size})".green
 
-    data = {}
-    prop = nil
-    content = nil
+    data = {'identifier' => vid}
 
     begin
       html = open("http://youtube.com/watch?v=#{vid}").read
 
-      ##
-      # Sometimes all the HTML is on one line
-      # so we need to split it up
-      ##
-      html.split('<').each do |line|
-        line =~ /meta itemprop="([^"]+)"/
-        prop = $1
+      doc = Nokogiri::HTML(html)
 
-        next unless WANTED.include?(prop)
-
-        line =~ /content="([^"]+)"/
-
-        case prop
-        when 'duration'
-          data[prop] = conv($1)
-        when 'name'
-          data[prop] = clean($1)
-        else
-          data[prop] = $1
+      doc.search('//meta').each do |e|
+        if e['name'] && e['name'] == 'title'
+          data['name'] = e['content']
+        elsif e['itemprop']
+          case e['itemprop']
+          when 'datePublished'
+            data['datePublished'] = e['content']
+          when 'uploadDate'
+            data['uploadDate'] = e['content']
+          when 'duration'
+            data['duration'] = conv(e['content'])
+          end
         end
       end
     rescue => e
