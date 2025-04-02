@@ -123,6 +123,7 @@ def best_format(vid)
     next if line.include?(' m3u8 ')
     next unless line.include?('English')
 
+    puts "[audio] #{line.gsub(/\s+/, ' ')}"
     a = line.split(/\s+/).first
     break
   end
@@ -133,6 +134,7 @@ def best_format(vid)
       next unless line.include?(' audio only ')
       next if line.include?(' m3u8 ')
 
+      puts "[audio] #{line.gsub(/\s+/, ' ')}"
       a = line.split(/\s+/).first
       break
     end
