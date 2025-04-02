@@ -117,13 +117,25 @@ def best_format(vid)
 
   return 'b' if v.nil?
 
-  # Find the best audio
+  # Find the best audio that is in English
   x.split("\n").each do |line|
     next unless line.include?(' audio only ')
     next if line.include?(' m3u8 ')
+    next unless line.include?('English')
 
     a = line.split(/\s+/).first
     break
+  end
+
+  if a.nil?
+    # That has failed
+    x.split("\n").each do |line|
+      next unless line.include?(' audio only ')
+      next if line.include?(' m3u8 ')
+
+      a = line.split(/\s+/).first
+      break
+    end
   end
 
   return 'b' if a.nil?
