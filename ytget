@@ -84,6 +84,8 @@ def get_options
       flags['format'] = ARGV.shift
     when '--limit'
       flags['limit'] = ARGV.shift.to_i
+    when '--id'
+      flags['id'] = ARGV.shift
     else
       opts << x
     end
@@ -148,6 +150,7 @@ end
 flags, opts = get_options
 
 fmt = flags['format'] || 'b'
+wanted_vid = flags['id']
 
 d, a = get_files
 
@@ -170,6 +173,8 @@ todo.each_with_index do |vid, index|
     puts '    Download limit reached'.yellow
     break
   end
+
+  next if wanted_vid && wanted_vid != vid
 
   puts "==> Downloading #{vid} (#{index + 1} of #{todo.size})".green
 
