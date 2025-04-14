@@ -102,7 +102,7 @@ begin
       if all_props?(x)
         found_data << x
       else
-        puts "    Incomplete data for #{vid}".red
+        puts "    Incomplete data for #{vid} #{data}".red
       end
     else
       puts "    No data found for #{vid}".red
