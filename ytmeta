@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'open-uri'
+require 'net/http'
+require 'uri'
 require 'csv'
 require 'nokogiri'
 
@@ -73,7 +74,7 @@ begin
     data = {'identifier' => vid}
 
     begin
-      html = open("http://youtube.com/watch?v=#{vid}").read
+      html = Net::HTTP.get(URI.parse("http://youtube.com/watch?v=#{vid}"))
 
       doc = Nokogiri::HTML(html)
 
