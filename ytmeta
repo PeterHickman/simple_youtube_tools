@@ -74,9 +74,15 @@ begin
     data = {'identifier' => vid}
 
     begin
-      html = Net::HTTP.get(URI.parse("http://youtube.com/watch?v=#{vid}"))
+      html = Net::HTTP.get(URI.parse("https://www.youtube.com/watch?v=#{vid}"))
 
       doc = Nokogiri::HTML(html)
+
+      # We want to find
+      # 1. duration
+      # 2. name
+      # 3. datePublished
+      # 4. uploadDate
 
       doc.search('//meta').each do |e|
         if e['name'] && e['name'] == 'title'
@@ -97,6 +103,7 @@ begin
     end
 
     if data.any?
+      p data
       puts "    #{data['name']}"
       x = WANTED.map { |prop| data[prop] }
       if all_props?(x)
