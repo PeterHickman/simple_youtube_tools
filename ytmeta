@@ -103,7 +103,6 @@ begin
     end
 
     if data.any?
-      p data
       puts "    #{data['name']}"
       x = WANTED.map { |prop| data[prop] }
       if all_props?(x)
