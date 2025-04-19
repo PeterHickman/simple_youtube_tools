@@ -76,7 +76,7 @@ begin
     begin
       html = Net::HTTP.get(URI.parse("https://www.youtube.com/watch?v=#{vid}"))
 
-      doc = Nokogiri::HTML(html)
+      doc = Nokogiri::HTML(html.force_encoding('UTF-8'))
 
       # We want to find
       # 1. duration
