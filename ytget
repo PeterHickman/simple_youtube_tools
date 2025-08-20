@@ -47,6 +47,40 @@ class List
   end
 end
 
+Option = Struct.new(:fid, :score, :line)
+
+def score_audio(line)
+  l = line.downcase
+
+  s = 0
+  s += 1 if l.include?('high')
+  s += 1 if l.include?('default')
+  s += 1 if l.include?('mp4')
+
+  s
+end
+
+def score_video(res, line)
+  l = line.downcase
+
+  s = 0
+  s += 1 if l.include?('mp4')
+  s += score_res(res)
+
+  s
+end
+
+def score_res(res)
+  x, = res.split('x').map(&:to_i)
+
+  if x < 1280
+    x / 1280.0
+  else
+    # Slightly favour the larger formats
+    1280.0 / x + 0.1
+  end
+end
+
 def get_files
   downloaded = 'downloaded.txt'
   available  = nil
@@ -97,54 +131,26 @@ end
 def best_format(vid)
   x = `yt-dlp -F https://www.youtube.com/watch?v=#{vid}`
 
-  v = nil
-  a = nil
+  video = []
+  audio = []
 
-  formats = []
-  # Find the best video
   x.split("\n").each do |line|
-    next unless line.include?(' video only ')
-    next unless line.include?(' mp4 ')
-
-    # Earlier files are more compressed
-    v = line.split(/\s+/).first
-    r = line.split(/\s+/)[2].split('x').first.to_i
-
-    next unless r >= 1000
-
-    formats << [r, v]
-  end
-
-  v = formats.sort.first.last
-
-  return 'b' if v.nil?
-
-  # Find the best audio that is in English
-  x.split("\n").each do |line|
-    next unless line.include?(' audio only ')
-    next if line.include?(' m3u8 ')
-    next unless line.include?('English')
-
-    puts "[audio] #{line.gsub(/\s+/, ' ')}"
-    a = line.split(/\s+/).first
-    break
-  end
-
-  if a.nil?
-    # That has failed
-    x.split("\n").each do |line|
-      next unless line.include?(' audio only ')
-      next if line.include?(' m3u8 ')
-
-      puts "[audio] #{line.gsub(/\s+/, ' ')}"
-      a = line.split(/\s+/).first
-      break
+    if line.include?('audio only')
+      fid, = line.split(/\s+/, 2)
+      audio << Option.new(fid, score_audio(line), line)
+    elsif line.include?('video only')
+      fid, _, res, = line.split(/\s+/, 4)
+      video << Option.new(fid, score_video(res, line), line)
     end
   end
 
-  return 'b' if a.nil?
+  a = audio.sort_by(&:score).last
+  v = video.sort_by(&:score).last
 
-  "#{v}+#{a}"
+  puts "[audio] #{a.line.gsub(/\s+/, ' ')}"
+  puts "[video] #{v.line.gsub(/\s+/, ' ')}"
+
+  "#{v.fid}+#{a.fid}"
 end
 
 flags, opts = get_options
