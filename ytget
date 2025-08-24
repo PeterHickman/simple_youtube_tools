@@ -53,9 +53,14 @@ def score_audio(line)
   l = line.downcase
 
   s = 0
-  s += 1 if l.include?('high')
+  s += 1.5 if l.include?('high')
+  s += 1 if l.include?('medium')
   s += 1 if l.include?('default')
   s += 1 if l.include?('mp4')
+  s += 1 if l.include?('m4a')
+  s += 1 if l.include?('webm')
+
+  s -= 1.5 if l.include?('untested')
 
   s
 end
@@ -65,7 +70,10 @@ def score_video(res, line)
 
   s = 0
   s += 1 if l.include?('mp4')
+  s += 1 if l.include?('webm')
   s += score_res(res)
+
+  s -= 1.5 if l.include?('untested')
 
   s
 end
