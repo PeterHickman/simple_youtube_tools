@@ -107,7 +107,7 @@ def get_files
 end
 
 def get_options
-  flags = { 'limit' => 20 }
+  flags = { 'limit' => 20, 'sleep' =>  }
   opts = []
 
   while ARGV.any?
@@ -120,6 +120,8 @@ def get_options
       flags['limit'] = ARGV.shift.to_i
     when '--id'
       flags['id'] = ARGV.shift
+    when '--sleep'
+      flags['sleep'] = ARGV.shift.to_i
     else
       opts << x
     end
@@ -175,11 +177,6 @@ end
 puts "    #{todo.size} new videos to download".bold
 
 todo.each_with_index do |vid, index|
-  if index == flags['limit']
-    puts '    Download limit reached'.yellow
-    break
-  end
-
   next if wanted_vid && wanted_vid != vid
 
   puts "==> Downloading #{vid} (#{index + 1} of #{todo.size})".green
@@ -207,7 +204,12 @@ todo.each_with_index do |vid, index|
     end
   end
 
-  sleep 5
+  if index == flags['limit']
+    puts '    Download limit reached'.yellow
+    break
+  end
+
+  sleep flags['sleep']
 end
 
 puts '==> Ended'.bold
