@@ -60,8 +60,6 @@ def score_audio(line)
   s += 1 if l.include?('m4a')
   s += 1 if l.include?('webm')
 
-  s -= 1.5 if l.include?('untested')
-
   s
 end
 
@@ -72,8 +70,6 @@ def score_video(res, line)
   s += 1 if l.include?('mp4')
   s += 1 if l.include?('webm')
   s += score_res(res)
-
-  s -= 1.5 if l.include?('untested')
 
   s
 end
@@ -145,6 +141,10 @@ def best_format(vid)
   audio = []
 
   x.split("\n").each do |line|
+    line = line.downcase
+
+    next if line.include?('untested')
+
     if line.include?('audio only')
       fid, = line.split(/\s+/, 2)
       audio << Option.new(fid, score_audio(line), line)
@@ -212,7 +212,7 @@ todo.each_with_index do |vid, index|
     end
   end
 
-  if index == flags['limit']
+  if index + 1 == flags['limit']
     puts '    Download limit reached'.yellow
     break
   end
