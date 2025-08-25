@@ -56,7 +56,7 @@ def score_audio(line)
   s += 1.5 if l.include?('high')
   s += 1 if l.include?('medium')
   s += 1 if l.include?('default')
-  s += 1 if l.include?('mp4')
+  s += 1.5 if l.include?('mp4')
   s += 1 if l.include?('m4a')
   s += 1 if l.include?('webm')
 
