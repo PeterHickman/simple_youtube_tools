@@ -50,25 +50,21 @@ end
 Option = Struct.new(:fid, :score, :line)
 
 def score_audio(line)
-  l = line.downcase
-
   s = 0
-  s += 1.5 if l.include?('high')
-  s += 1 if l.include?('medium')
-  s += 1 if l.include?('default')
-  s += 1.5 if l.include?('mp4')
-  s += 1 if l.include?('m4a')
-  s += 1 if l.include?('webm')
+  s += 1.5 if line.include?('high')
+  s += 1 if line.include?('medium')
+  s += 1 if line.include?('default')
+  s += 1.5 if line.include?('mp4')
+  s += 1 if line.include?('m4a')
+  s += 1 if line.include?('webm')
 
   s
 end
 
 def score_video(res, line)
-  l = line.downcase
-
   s = 0
-  s += 1 if l.include?('mp4')
-  s += 1 if l.include?('webm')
+  s += 1 if line.include?('mp4')
+  s += 1 if line.include?('webm')
   s += score_res(res)
 
   s
@@ -139,6 +135,7 @@ def best_format(vid)
 
   video = []
   audio = []
+  count = 0
 
   x.split("\n").each do |line|
     line = line.downcase
@@ -146,13 +143,17 @@ def best_format(vid)
     next if line.include?('untested')
 
     if line.include?('audio only')
+      count += 1
       fid, = line.split(/\s+/, 2)
       audio << Option.new(fid, score_audio(line), line)
     elsif line.include?('video only')
+      count += 1
       fid, _, res, = line.split(/\s+/, 4)
       video << Option.new(fid, score_video(res, line), line)
     end
   end
+
+  puts "[best] There were #{count} usable formats"
 
   a = audio.sort_by(&:score).last
   v = video.sort_by(&:score).last
