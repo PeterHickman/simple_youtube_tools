@@ -188,7 +188,11 @@ puts "    #{todo.size} new videos to download".bold
 todo.each_with_index do |vid, index|
   next if wanted_vid && wanted_vid != vid
 
-  puts "==> Downloading #{vid} (#{index + 1} of #{todo.size})".green
+  if wanted_vid
+    puts "==> Downloading #{vid}".green
+  else
+    puts "==> Downloading #{vid} (#{index + 1} of #{todo.size})".green
+  end
 
   begin
     if fmt == 'b'
