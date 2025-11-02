@@ -182,6 +182,7 @@ available.data.each do |vid|
   next if downloads.include?(vid)
   todo << vid
 end
+todo.shuffle!
 
 puts "    #{todo.size} new videos to download".bold
 
